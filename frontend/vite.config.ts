@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     proxy: {
       "/api": {
-        target: "https://quadrachat-ai-backend.onrender.com",
+        target: "http://localhost:3001",
         changeOrigin: true,
       },
     },

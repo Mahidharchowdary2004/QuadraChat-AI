@@ -6,9 +6,8 @@
     "dev": "npm --prefix ./frontend run dev",
     "dev:frontend": "npm --prefix ./frontend run dev",
     "dev:backend": "npm --prefix ./backend run dev",
-    "dev:both": "npm --prefix ./frontend run dev:both",
+    "dev:both": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:both:local": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "build": "npm --prefix ./frontend run build"
   }
 }
-
-
