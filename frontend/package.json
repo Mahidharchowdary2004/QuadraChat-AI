@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "dev:server": "node ../backend/server.mjs",
-    "dev:both": "concurrently \"npm run dev\" \"npm run dev:server\""
+    "dev:both": "concurrently \"npm run dev\" \"echo 'Using deployed backend at https://quadrachat-ai-backend.onrender.com/'\""
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

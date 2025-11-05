@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "dev": "npm --prefix ./frontend run dev:both",
+    "dev": "npm --prefix ./frontend run dev",
     "dev:frontend": "npm --prefix ./frontend run dev",
     "dev:backend": "npm --prefix ./backend run dev",
     "dev:both": "npm --prefix ./frontend run dev:both",
