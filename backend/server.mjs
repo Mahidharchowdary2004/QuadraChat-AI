@@ -37,40 +37,6 @@ if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
 
 // Middleware
 app.use(express.json());
-+
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-+
 
 // CORS middleware
 app.use((req, res, next) => {
@@ -83,6 +49,73 @@ app.use((req, res, next) => {
   } else {
     next();
   }
+});
+
+// Welcome route for web access
+app.get('/', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Quadra Chatbox Backend</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          max-width: 800px;
+          margin: 0 auto;
+          padding: 20px;
+          background-color: #f5f5f5;
+        }
+        .container {
+          background-color: white;
+          padding: 30px;
+          border-radius: 10px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+          color: #333;
+          text-align: center;
+        }
+        .endpoint {
+          background-color: #f8f9fa;
+          border: 1px solid #dee2e6;
+          border-radius: 5px;
+          padding: 15px;
+          margin: 10px 0;
+        }
+        .endpoint h3 {
+          margin-top: 0;
+          color: #007bff;
+        }
+        code {
+          background-color: #e9ecef;
+          padding: 2px 4px;
+          border-radius: 3px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h1>🚀 Quadra Chatbox Backend Server</h1>
+        <p>Welcome to the Quadra Chatbox backend server! This server provides API endpoints for chat functionality.</p>
+        
+        <div class="endpoint">
+          <h3>Available Endpoints:</h3>
+          <p><strong>Chat Endpoint:</strong> <code>POST /api/chat</code></p>
+          <p><strong>Test Endpoint:</strong> <code>GET /api/test</code></p>
+        </div>
+        
+        <div class="endpoint">
+          <h3>Server Information:</h3>
+          <p><strong>Port:</strong> ${PORT}</p>
+          <p><strong>Status:</strong> Running</p>
+        </div>
+        
+        <p>To use the chat functionality, make requests to the <code>/api/chat</code> endpoint with a JSON payload containing messages.</p>
+      </div>
+    </body>
+    </html>
+  `);
 });
 
 // Rate limiting - disabled by default in development, configurable via environment variables
@@ -572,4 +605,5 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   console.log(`Chat endpoint available at http://localhost:${PORT}/api/chat`);
   console.log(`Test endpoint available at http://localhost:${PORT}/api/test`);
+  console.log(`Welcome page available at http://localhost:${PORT}/`);
 });
