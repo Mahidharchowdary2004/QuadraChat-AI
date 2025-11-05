@@ -8,6 +8,7 @@
     "dev:backend": "npm --prefix ./backend run dev",
     "dev:both": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:both:local": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "build": "npm --prefix ./frontend run build"
+    "build": "cd frontend && npm run build",
+    "render-build": "cd frontend && npm install && npm run build"
   }
 }
