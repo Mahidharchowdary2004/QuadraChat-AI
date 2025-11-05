@@ -21,6 +21,16 @@ const waitForRateLimit = async (): Promise<void> => {
   lastRequestTime = Date.now();
 };
 
+// Function to get the base URL for API calls
+const getApiBaseUrl = (): string => {
+  // In production, use the deployed backend URL
+  if (import.meta.env.PROD) {
+    return "https://quadrachat-ai.onrender.com";
+  }
+  // In development, use relative URL (will be proxied)
+  return "";
+};
+
 // Updated function to call the proxy server with provider selection
 export const callOpenAI = async (messages: any[], provider: string = 'openrouter'): Promise<string> => {
   // Wait for global rate limiting
@@ -28,7 +38,7 @@ export const callOpenAI = async (messages: any[], provider: string = 'openrouter
 
   try {
     // Call our proxy server instead of the OpenAI API directly
-    const response = await fetch("/api/chat", {
+    const response = await fetch(`${getApiBaseUrl()}/api/chat`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
