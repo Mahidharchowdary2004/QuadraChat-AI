@@ -1,0 +1,30 @@
+{
+  "name": "openai-proxy-server",
+  "version": "1.0.0",
+  "description": "A lightweight Node.js + Express backend that proxies requests to the OpenAI API",
+  "main": "server.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "nodemon server.mjs"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.7.0",
+    "node-fetch": "^3.3.2",
+    "dotenv": "^16.0.3",
+    "razorpay": "^2.9.2",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  },
+  "keywords": [
+    "openai",
+    "proxy",
+    "express",
+    "api"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QuadraChat AI</title>
+    <meta
+      name="description"
+      content="Four independent AI chat sessions powered by GPT-5 Nano with Firebase and Supabase integration"
+    />
+    <meta name="author" content="QuadraChat AI Team" />
+
+    <!-- Open Graph Metadata -->
+    <meta property="og:title" content="QuadraChat AI" />
+    <meta
+      property="og:description"
+      content="Experience real-time multi-tile AI chat sessions with smart token tracking and Razorpay integration."
+    />
+    <meta property="og:type" content="website" />
+    <!-- Optional: Add your own image link below -->
+    <meta property="og:image" content="/assets/og-image.png" />
+
+    <!-- Twitter Metadata -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="QuadraChat AI" />
+    <meta
+      name="twitter:description"
+      content="Multi-Tile GPT-5 Nano Chat POC with Firebase notifications and Supabase memory."
+    />
+    <!-- Optional: Add your own image link below -->
+    <meta name="twitter:image" content="/assets/og-image.png" />
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script>
+      // Register service worker for Firebase messaging
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker
+            .register('/firebase-messaging-sw.js')
+            .then(function (registration) {
+              console.log('Service Worker registered with scope:', registration.scope);
+            })
+            .catch(function (error) {
+              console.log('Service Worker registration failed:', error);
+            });
+        });
+      }
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -2,16 +2,31 @@ import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { firebaseConfig } from "./config";
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase only if required config exists
+const hasFirebaseConfig = Boolean(
+  firebaseConfig?.apiKey &&
+  firebaseConfig?.authDomain &&
+  firebaseConfig?.projectId &&
+  firebaseConfig?.messagingSenderId &&
+  firebaseConfig?.appId
+) && firebaseConfig.apiKey !== "your_firebase_api_key";
 
-// Initialize Firebase Cloud Messaging and get a reference to the service
+let app: any = null;
 let messaging: any = null;
 
 try {
-  messaging = getMessaging(app);
+  if (hasFirebaseConfig) {
+    app = initializeApp(firebaseConfig);
+    try {
+      messaging = getMessaging(app);
+    } catch (error) {
+      console.warn("Firebase Messaging not supported in this environment:", error);
+    }
+  } else {
+    console.info("Firebase config missing; skipping Firebase initialization.");
+  }
 } catch (error) {
-  console.warn("Firebase Messaging not supported in this environment:", error);
+  console.warn("Failed to initialize Firebase:", error);
 }
 
 export { app, messaging };
@@ -19,7 +34,7 @@ export { app, messaging };
 // Request permission to receive notifications
 export const requestFirebaseNotificationPermission = async () => {
   if (!messaging) {
-    throw new Error("Firebase Messaging is not supported");
+    throw new Error("Firebase Messaging is not configured");
   }
 
   try {
