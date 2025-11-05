@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "dev": "nodemon server.mjs"
+    "dev": "nodemon server.mjs",
+    "build": "echo 'No build step required for backend - dependencies installed via npm install'"
   },
   "dependencies": {
     "express": "^4.18.2",
