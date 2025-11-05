@@ -47,14 +47,32 @@ Contains sensitive variables that should never be exposed to the browser:
    ```
 
 ### 3. Deploying to Render
-1. In your Render dashboard, go to your backend service
-2. In the "Environment" section, add the following variables:
-   - `OPENROUTER_API_KEY` = your actual OpenRouter API key
-   - `OPENAI_GPT5_NANO_KEY` = your actual GPT-5 Nano key
-   - `RAZORPAY_KEY_ID` = your actual Razorpay key ID
-   - `RAZORPAY_KEY_SECRET` = your actual Razorpay key secret
 
-3. Do NOT add any VITE_ prefixed variables to Render as they should only be in the frontend.
+There are two ways to deploy this monorepo to Render:
+
+#### Option 1: Deploy as a Monorepo (Recommended)
+1. In your Render dashboard, create a new Web Service
+2. Connect your GitHub repository
+3. Set the "Root Directory" to `frontend` (this treats the frontend directory as the root of the project)
+4. Set the "Build Command" to: `npm install && npm run build`
+5. Set the "Start Command" to: `npm run preview`
+6. In the "Environment" section, add your frontend environment variables (the ones prefixed with `VITE_`)
+
+#### Option 2: Deploy with Custom Build Script
+1. In your Render dashboard, create a new Web Service
+2. Connect your GitHub repository
+3. Leave the "Root Directory" as the default (root of the repository)
+4. Set the "Build Command" to: `npm run build`
+5. Set the "Start Command" to: `cd frontend && npm run preview`
+6. In the "Environment" section, add your frontend environment variables (the ones prefixed with `VITE_`)
+
+### 4. Backend Deployment on Render
+1. In your Render dashboard, create a new Web Service for the backend
+2. Connect your GitHub repository
+3. Set the "Root Directory" to `backend`
+4. Set the "Build Command" to: `npm install`
+5. Set the "Start Command" to: `npm run start`
+6. In the "Environment" section, add your backend environment variables (the sensitive ones without `VITE_` prefix)
 
 ## Security Notes
 
