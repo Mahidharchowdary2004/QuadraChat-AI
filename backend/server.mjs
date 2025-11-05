@@ -11,13 +11,13 @@ import { v4 as uuidv4 } from 'uuid';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config({ path: '../frontend/.env' });
+dotenv.config({ path: '.env' });
 
 // Debug logging for environment variables
 console.log('Environment variables loaded:');
-console.log('VITE_OPENROUTER_API_KEY:', process.env.VITE_OPENROUTER_API_KEY ? 'Loaded' : 'Not found');
-console.log('VITE_OPENAI_GPT5_NANO_KEY:', process.env.VITE_OPENAI_GPT5_NANO_KEY ? 'Loaded' : 'Not found');
-console.log('VITE_RAZORPAY_KEY_ID:', process.env.VITE_RAZORPAY_KEY_ID ? 'Loaded' : 'Not found');
+console.log('OPENROUTER_API_KEY:', process.env.OPENROUTER_API_KEY ? 'Loaded' : 'Not found');
+console.log('OPENAI_GPT5_NANO_KEY:', process.env.OPENAI_GPT5_NANO_KEY ? 'Loaded' : 'Not found');
+console.log('RAZORPAY_KEY_ID:', process.env.RAZORPAY_KEY_ID ? 'Loaded' : 'Not found');
 console.log('Current working directory:', process.cwd());
 
 const app = express();
@@ -25,10 +25,10 @@ const PORT = process.env.PORT || 3001; // Keep 3001 for the server
 
 // Initialize Razorpay
 let razorpayInstance = null;
-if (process.env.VITE_RAZORPAY_KEY_ID && process.env.VITE_RAZORPAY_KEY_SECRET) {
+if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
   razorpayInstance = new Razorpay({
-    key_id: process.env.VITE_RAZORPAY_KEY_ID,
-    key_secret: process.env.VITE_RAZORPAY_KEY_SECRET,
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
   });
   console.log('Razorpay initialized successfully');
 } else {
@@ -37,6 +37,40 @@ if (process.env.VITE_RAZORPAY_KEY_ID && process.env.VITE_RAZORPAY_KEY_SECRET) {
 
 // Middleware
 app.use(express.json());
++
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
++
 
 // CORS middleware
 app.use((req, res, next) => {
@@ -193,8 +227,8 @@ const upgradeUserPlan = (userId, plan) => {
 async function callOpenAIWithRetry(messages, maxRetries = 5, provider = 'openrouter') {
   // Debug logging for environment variables inside function
   console.log('Inside callOpenAIWithRetry function:');
-  console.log('  VITE_OPENROUTER_API_KEY:', process.env.VITE_OPENROUTER_API_KEY ? 'Loaded' : 'Not found');
-  console.log('  VITE_OPENAI_GPT5_NANO_KEY:', process.env.VITE_OPENAI_GPT5_NANO_KEY ? 'Loaded' : 'Not found');
+  console.log('  OPENROUTER_API_KEY:', process.env.OPENROUTER_API_KEY ? 'Loaded' : 'Not found');
+  console.log('  OPENAI_GPT5_NANO_KEY:', process.env.OPENAI_GPT5_NANO_KEY ? 'Loaded' : 'Not found');
   
   let API_KEY;
   let API_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
@@ -203,19 +237,19 @@ async function callOpenAIWithRetry(messages, maxRetries = 5, provider = 'openrou
   // Select API key and endpoint based on provider
   switch(provider) {
     case 'openrouter':
-      API_KEY = process.env.VITE_OPENROUTER_API_KEY;
+      API_KEY = process.env.OPENROUTER_API_KEY;
       API_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
       model = 'openai/gpt-3.5-turbo'; // Default model for OpenRouter
       break;
     case 'gpt5-nano':
       // GPT-5 Nano uses the specific GPT-5 Nano key with OpenRouter's endpoint
-      API_KEY = process.env.VITE_OPENAI_GPT5_NANO_KEY;
+      API_KEY = process.env.OPENAI_GPT5_NANO_KEY;
       API_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
       model = 'openai/gpt-5-nano';
       break;
     default:
       // Default to OpenRouter if invalid provider is specified
-      API_KEY = process.env.VITE_OPENROUTER_API_KEY;
+      API_KEY = process.env.OPENROUTER_API_KEY;
       model = 'openai/gpt-3.5-turbo';
       break;
   }
@@ -229,7 +263,7 @@ async function callOpenAIWithRetry(messages, maxRetries = 5, provider = 'openrou
   }
   
   // Validate API key format
-  if (!API_KEY.startsWith('sk-or-v1-')) {
+  if (API_KEY && !API_KEY.startsWith('sk-or-v1-')) {
     console.warn(`${provider} API key format appears invalid. Expected to start with 'sk-or-v1-'`);
     throw new Error(`${provider} API key format is invalid. Expected to start with 'sk-or-v1-'. Please check your API key.`);
   }
