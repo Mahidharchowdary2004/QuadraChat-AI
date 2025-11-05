@@ -333,9 +333,23 @@ const ChatInterface = ({ tileId, onBack }: ChatInterfaceProps) => {
           description: "API key is not configured properly.",
           variant: "destructive",
         });
+      } else if (error.message && error.message.includes("authentication failed")) {
+        setError("API authentication failed. Please check your API key validity.");
+        toast({
+          title: "Authentication Error",
+          description: "API authentication failed. Please verify your API key is valid and active.",
+          variant: "destructive",
+        });
       } else if (error.message && error.message.includes("Payment required")) {
         // Show payment dialog
         setShowPaymentDialog(true);
+      } else if (error.message && error.message.includes("User not found")) {
+        setError("API authentication failed. The API key appears to be invalid or revoked. Please check your API key.");
+        toast({
+          title: "Authentication Error",
+          description: "API authentication failed. The API key appears to be invalid or revoked. Please check your API key.",
+          variant: "destructive",
+        });
       } else {
         setError(error.message || "Failed to send message. Please try again.");
         toast({

@@ -11,13 +11,13 @@ import { v4 as uuidv4 } from 'uuid';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config({ path: '.env.server' });
+dotenv.config({ path: '../frontend/.env' });
 
 // Debug logging for environment variables
 console.log('Environment variables loaded:');
-console.log('OPENROUTER_API_KEY:', process.env.OPENROUTER_API_KEY ? 'Loaded' : 'Not found');
-console.log('OPENAI_GPT5_NANO_KEY:', process.env.OPENAI_GPT5_NANO_KEY ? 'Loaded' : 'Not found');
-console.log('RAZORPAY_KEY_ID:', process.env.RAZORPAY_KEY_ID ? 'Loaded' : 'Not found');
+console.log('VITE_OPENROUTER_API_KEY:', process.env.VITE_OPENROUTER_API_KEY ? 'Loaded' : 'Not found');
+console.log('VITE_OPENAI_GPT5_NANO_KEY:', process.env.VITE_OPENAI_GPT5_NANO_KEY ? 'Loaded' : 'Not found');
+console.log('VITE_RAZORPAY_KEY_ID:', process.env.VITE_RAZORPAY_KEY_ID ? 'Loaded' : 'Not found');
 console.log('Current working directory:', process.cwd());
 
 const app = express();
@@ -25,10 +25,10 @@ const PORT = process.env.PORT || 3001; // Keep 3001 for the server
 
 // Initialize Razorpay
 let razorpayInstance = null;
-if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+if (process.env.VITE_RAZORPAY_KEY_ID && process.env.VITE_RAZORPAY_KEY_SECRET) {
   razorpayInstance = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
+    key_id: process.env.VITE_RAZORPAY_KEY_ID,
+    key_secret: process.env.VITE_RAZORPAY_KEY_SECRET,
   });
   console.log('Razorpay initialized successfully');
 } else {
@@ -191,6 +191,11 @@ const upgradeUserPlan = (userId, plan) => {
 
 // Function to call OpenAI API with exponential backoff
 async function callOpenAIWithRetry(messages, maxRetries = 5, provider = 'openrouter') {
+  // Debug logging for environment variables inside function
+  console.log('Inside callOpenAIWithRetry function:');
+  console.log('  VITE_OPENROUTER_API_KEY:', process.env.VITE_OPENROUTER_API_KEY ? 'Loaded' : 'Not found');
+  console.log('  VITE_OPENAI_GPT5_NANO_KEY:', process.env.VITE_OPENAI_GPT5_NANO_KEY ? 'Loaded' : 'Not found');
+  
   let API_KEY;
   let API_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
   let model = 'openai/gpt-3.5-turbo';
@@ -198,19 +203,19 @@ async function callOpenAIWithRetry(messages, maxRetries = 5, provider = 'openrou
   // Select API key and endpoint based on provider
   switch(provider) {
     case 'openrouter':
-      API_KEY = process.env.OPENROUTER_API_KEY;
+      API_KEY = process.env.VITE_OPENROUTER_API_KEY;
       API_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
       model = 'openai/gpt-3.5-turbo'; // Default model for OpenRouter
       break;
     case 'gpt5-nano':
       // GPT-5 Nano uses the specific GPT-5 Nano key with OpenRouter's endpoint
-      API_KEY = process.env.OPENAI_GPT5_NANO_KEY;
+      API_KEY = process.env.VITE_OPENAI_GPT5_NANO_KEY;
       API_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
       model = 'openai/gpt-5-nano';
       break;
     default:
       // Default to OpenRouter if invalid provider is specified
-      API_KEY = process.env.OPENROUTER_API_KEY;
+      API_KEY = process.env.VITE_OPENROUTER_API_KEY;
       model = 'openai/gpt-3.5-turbo';
       break;
   }
@@ -222,12 +227,24 @@ async function callOpenAIWithRetry(messages, maxRetries = 5, provider = 'openrou
   if (!API_KEY) {
     throw new Error(`${provider} API key is not configured`);
   }
+  
+  // Validate API key format
+  if (!API_KEY.startsWith('sk-or-v1-')) {
+    console.warn(`${provider} API key format appears invalid. Expected to start with 'sk-or-v1-'`);
+    throw new Error(`${provider} API key format is invalid. Expected to start with 'sk-or-v1-'. Please check your API key.`);
+  }
 
   let lastError = null;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       console.log(`Attempting to call ${provider} API (attempt ${attempt + 1}/${maxRetries + 1})`);
+      
+      // Debug logging for request
+      console.log(`Making request to ${provider} API:`);
+      console.log(`  Endpoint: ${API_ENDPOINT}`);
+      console.log(`  Model: ${model}`);
+      console.log(`  API Key (first 10 chars): ${API_KEY ? API_KEY.substring(0, 10) + '...' : 'Missing'}`);
       
       const response = await fetch(API_ENDPOINT, {
         method: 'POST',
@@ -275,6 +292,13 @@ async function callOpenAIWithRetry(messages, maxRetries = 5, provider = 'openrou
         }
         
         const errorText = await response.text();
+        console.error(`${provider} API error details:`, errorText);
+        
+        // Special handling for 401 errors
+        if (response.status === 401) {
+          throw new Error(`${provider} API authentication failed. The API key appears to be invalid or revoked. Please check your API key. Details: ${errorText}`);
+        }
+        
         throw new Error(`${provider} API error: ${response.status} - ${errorText}`);
       }
 
