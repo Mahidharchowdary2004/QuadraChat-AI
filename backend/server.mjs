@@ -477,18 +477,31 @@ app.post('/api/chat', async (req, res) => {
   } catch (error) {
     console.error('Error processing chat request:', error.message);
     
+    // Ensure we always return a valid JSON response
+    let statusCode = 500;
+    let errorMessage = 'Failed to process request: ' + (error.message || 'Unknown error occurred');
+    
     // Handle specific error types
-    if (error.message.includes('API key')) {
-      res.status(500).json({ error: 'Server configuration error: ' + error.message });
-    } else if (error.message.includes('rate limit') || error.message.includes('Rate limit')) {
-      res.status(429).json({ error: error.message });
-    } else if (error.message.includes('Payment required')) {
-      res.status(402).json({ error: error.message });
-    } else {
-      // Extract error message from various error formats
-      const errorMessage = error.message || error.toString() || 'Unknown error occurred';
-      res.status(500).json({ error: 'Failed to process request: ' + errorMessage });
+    if (error.message && error.message.includes('API key')) {
+      statusCode = 500;
+      errorMessage = 'Server configuration error: ' + error.message;
+    } else if (error.message && (error.message.includes('rate limit') || error.message.includes('Rate limit'))) {
+      statusCode = 429;
+      errorMessage = error.message;
+    } else if (error.message && error.message.includes('Payment required')) {
+      statusCode = 402;
+      errorMessage = error.message;
+    } else if (error.name === 'FetchError' || error.name === 'TypeError') {
+      // Network errors
+      statusCode = 502;
+      errorMessage = 'Network error connecting to AI service. Please try again later.';
     }
+    
+    // Always return JSON response
+    res.status(statusCode).json({ 
+      error: errorMessage,
+      provider: req.body.provider || 'openrouter'
+    });
   }
 });
 

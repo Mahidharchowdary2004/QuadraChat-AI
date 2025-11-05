@@ -49,33 +49,26 @@ export const callOpenAI = async (messages: any[], provider: string = 'openrouter
       }),
     });
 
+    // Check if response is OK
     if (!response.ok) {
-      // Get error message from response - clone to read safely
       let errorMessage = `Server error: ${response.status}`;
-      const clonedResponse = response.clone();
       
       try {
-        // Try to parse as JSON first
-        const errorData = await clonedResponse.json();
+        // Try to parse error response as JSON
+        const errorData = await response.json();
         errorMessage = errorData.error || errorData.message || errorMessage;
-      } catch {
-        // If JSON parsing fails, try text from original response
+      } catch (jsonError) {
+        // If JSON parsing fails, try to get text
         try {
           const errorText = await response.text();
           errorMessage = errorText || errorMessage;
-        } catch {
+        } catch (textError) {
           // If both fail, use status code
           errorMessage = `Server error: ${response.status} ${response.statusText}`;
         }
       }
 
       if (response.status === 429) {
-        // Try to get the retry-after header or error message
-        const retryAfter = response.headers.get('Retry-After');
-        if (retryAfter) {
-          const seconds = parseInt(retryAfter);
-          throw new Error(`Rate limit exceeded. Please wait ${seconds} second(s) before trying again.`);
-        }
         throw new Error(errorMessage || "Rate limit exceeded. Please wait a moment before sending another message.");
       }
       if (response.status === 402) {
@@ -84,7 +77,20 @@ export const callOpenAI = async (messages: any[], provider: string = 'openrouter
       throw new Error(errorMessage);
     }
 
-    const data = await response.json();
+    // Try to parse the response as JSON
+    let data;
+    try {
+      data = await response.json();
+    } catch (jsonError) {
+      // If JSON parsing fails, it's likely an HTML error page or empty response
+      const responseText = await response.text();
+      if (responseText.trim() === '') {
+        throw new Error("Received empty response from server. This may indicate a server configuration issue.");
+      } else {
+        throw new Error(`Received invalid response from server: ${responseText.substring(0, 200)}...`);
+      }
+    }
+
     console.log(`Received response from ${provider}:`, JSON.stringify(data, null, 2));
     
     // Handle different response formats
